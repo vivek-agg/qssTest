@@ -4,3 +4,15 @@ body,
   height: 100%;
   background-color: #f0f1f3;
 }
+
+th {
+  font-weight: 600 !important;
+}
+
+/* TO override some chip property */
+.WAMuiChipInput-chipContainer-18.WAMuiChipInput-labeled-22.WAMuiChipInput-chipContainer-18.WAMuiChipInput-standard-20 {
+  margin-top: 10px !important;
+}
+.WAMuiChipInput-label-23 {
+  top: 0 !important;
+}

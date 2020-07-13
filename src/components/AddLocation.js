@@ -1,10 +1,25 @@
 import React, { useState, useReducer, useEffect } from "react";
 import { Link, useParams, withRouter } from "react-router-dom";
-import { Grid, TextField, Button } from "@material-ui/core";
+import {
+  Grid,
+  TextField,
+  Button,
+  Select,
+  FormControl,
+  InputLabel,
+  MenuItem,
+} from "@material-ui/core";
+import ChipInput from "material-ui-chip-input";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import LocationTiming from "./LocationTiming";
-import { initialTimingState } from "../common/type";
+import { initialTimingState, formatPhoneNumber } from "../common/type";
+
+const states = [
+  { id: "1", name: "New York" },
+  { id: "2", name: "Chichago" },
+  { id: "3", name: "California" },
+];
 
 const useStyles = makeStyles({
   locationContainer: {
@@ -56,6 +71,16 @@ const useStyles = makeStyles({
   link: {
     textDecoration: "none",
   },
+  facility: {
+    color: "#000",
+    backgroundColor: "#ebe8e9",
+    marginTop: "17px",
+
+    "&:hover": {
+      color: "#000",
+      backgroundColor: "#ebe8e9",
+    },
+  },
 });
 
 const initialState = {
@@ -75,24 +100,8 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "onLocationChange":
-      return { ...state, locationName: action.value };
-    case "addressLine1Change":
-      return { ...state, addressLine1: action.value };
-    case "suiteChange":
-      return { ...state, suite: action.value };
-    case "addressLine2Change":
-      return { ...state, addressLine2: action.value };
-    case "cityChange":
-      return { ...state, city: action.value };
-    case "stateChange":
-      return { ...state, stateName: action.value };
-    case "zipChange":
-      return { ...state, zip: action.value };
-    case "phoneChange":
-      return { ...state, phone: action.value };
-    case "timezoneChange":
-      return { ...state, timezone: action.value };
+    case "onInputChange":
+      return { ...state, [action.id]: action.value };
 
     case "mergeTimings":
       return { ...state, timings: action.value };
@@ -117,6 +126,10 @@ const AddLocation = ({ history }) => {
   }, []);
 
   const [isFacilityOpen, setIsFacilityOpen] = useState(false);
+  const [errors, setErrors] = useState(null);
+  const [phoneValid, setPhoneValid] = useState(false);
+  const [zipValid, setZipValid] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const [locationState, dispatch] = useReducer(reducer, initialState);
 
@@ -130,14 +143,47 @@ const AddLocation = ({ history }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const errors = {};
+    setSubmitted(true);
     const locationArray = JSON.parse(localStorage.getItem("locations")) || [];
-    if (!id) {
-      locationArray.push(locationState);
-    } else {
-      locationArray[id] = locationState;
+
+    if (!locationState.locationName) {
+      errors.locationName = "Required";
     }
-    localStorage.setItem("locations", JSON.stringify(locationArray));
-    history.push("/");
+    if (!locationState.addressLine1) {
+      errors.addressLine1 = "Required";
+    }
+    if (!locationState.zip) {
+      errors.zip = "Required";
+    } else if (
+      !(locationState.zip.length >= 5 && locationState.zip.length <= 10)
+    ) {
+      setZipValid(false);
+      errors.zip = "Length should be 5-10";
+    } else {
+      setZipValid(true);
+    }
+    if (!locationState.phone) {
+      errors.phone = "Required";
+    } else if (!formatPhoneNumber(locationState.phone)) {
+      setPhoneValid(false);
+      errors.phone = "Invalid Format";
+    } else {
+      setPhoneValid(true);
+    }
+    setErrors(errors);
+    console.log("errors", errors);
+    if (Object.keys(errors).length === 0) {
+      locationState.phone = formatPhoneNumber(locationState.phone);
+      if (!id) {
+        locationArray.push(locationState);
+      } else {
+        locationArray[id] = locationState;
+      }
+      localStorage.setItem("locations", JSON.stringify(locationArray));
+      history.push("/");
+      setSubmitted(false);
+    }
   };
 
   return (
@@ -147,7 +193,7 @@ const AddLocation = ({ history }) => {
           <Typography variant="h6" className={classes.title}>
             Add Locations
           </Typography>
-          <form className={classes.form} onSubmit={handleSubmit}>
+          <form className={classes.form} onSubmit={handleSubmit} noValidate>
             <Grid container>
               <Grid item xs={12} sm={12} className={classes.locationField}>
                 <TextField
@@ -157,25 +203,40 @@ const AddLocation = ({ history }) => {
                   value={locationState.locationName}
                   onChange={(e) =>
                     dispatch({
-                      type: "onLocationChange",
+                      type: "onInputChange",
                       value: e.target.value,
+                      id: "locationName",
                     })
                   }
+                  required="true"
+                  error={
+                    submitted && !(locationState && locationState.locationName)
+                  }
+                  helperText={errors && errors.locationName}
+                  floatingLabelText="Location Name"
+                  errorText="Required"
                 />
               </Grid>
               <Grid container>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
                   <TextField
+                    required="true"
                     id="addressLine1"
                     label="Address Line1"
                     fullWidth
                     value={locationState.addressLine1}
                     onChange={(e) =>
                       dispatch({
-                        type: "addressLine1Change",
+                        type: "onInputChange",
                         value: e.target.value,
+                        id: "addressLine1",
                       })
                     }
+                    error={
+                      submitted &&
+                      !(locationState && locationState.addressLine1)
+                    }
+                    helperText={errors && errors.addressLine1}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
@@ -186,8 +247,9 @@ const AddLocation = ({ history }) => {
                     value={locationState.suite}
                     onChange={(e) =>
                       dispatch({
-                        type: "suiteChange",
+                        type: "onInputChange",
                         value: e.target.value,
+                        id: "suite",
                       })
                     }
                   />
@@ -202,8 +264,9 @@ const AddLocation = ({ history }) => {
                     value={locationState.addressLine2}
                     onChange={(e) =>
                       dispatch({
-                        type: "addressLine2Change",
+                        type: "onInputChange",
                         value: e.target.value,
+                        id: "addressLine2",
                       })
                     }
                   />
@@ -216,54 +279,80 @@ const AddLocation = ({ history }) => {
                     value={locationState.city}
                     onChange={(e) =>
                       dispatch({
-                        type: "cityChange",
+                        type: "onInputChange",
                         value: e.target.value,
+                        id: "city",
                       })
                     }
                   />
                 </Grid>
                 <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField
-                    id="state"
-                    label="State"
-                    fullWidth
-                    value={locationState.stateName}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "stateChange",
-                        value: e.target.value,
-                      })
-                    }
-                  />
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="state">State</InputLabel>
+                    <Select
+                      labelId="state"
+                      id="state"
+                      value={locationState.stateName}
+                      onChange={(e) => {
+                        dispatch({
+                          type: "onInputChange",
+                          value: e.target.value,
+                          id: "stateName",
+                        });
+                      }}
+                    >
+                      {states.map((state) => (
+                        <MenuItem key={state.id} value={state.name}>
+                          {state.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Grid>
               </Grid>
               <Grid container>
                 <Grid item xs={12} sm={3} className={classes.locationField}>
                   <TextField
+                    required="true"
+                    error={
+                      submitted &&
+                      !(locationState && locationState.zip && zipValid)
+                    }
                     id="zip"
                     label="Zip Code"
                     fullWidth
                     value={locationState.zip}
-                    onChange={(e) =>
+                    helperText={errors && errors.zip}
+                    onChange={(e) => {
+                      const newVal = e.target.value.replace(/\s/g, "");
                       dispatch({
-                        type: "zipChange",
-                        value: e.target.value,
-                      })
-                    }
+                        type: "onInputChange",
+                        value: newVal,
+                        id: "zip",
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={3} className={classes.locationField}>
                   <TextField
+                    required="true"
+                    error={
+                      submitted &&
+                      !(locationState && locationState.phone && phoneValid)
+                    }
                     id="phone"
                     label="Phone No."
+                    type="text"
                     fullWidth
                     value={locationState.phone}
                     onChange={(e) =>
                       dispatch({
-                        type: "phoneChange",
+                        type: "onInputChange",
                         value: e.target.value,
+                        id: "phone",
                       })
                     }
+                    helperText={errors && errors.phone}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
@@ -274,8 +363,9 @@ const AddLocation = ({ history }) => {
                     value={locationState.timezone}
                     onChange={(e) =>
                       dispatch({
-                        type: "timezoneChange",
+                        type: "onInputChange",
                         value: e.target.value,
+                        id: "timezone",
                       })
                     }
                   />
@@ -283,16 +373,26 @@ const AddLocation = ({ history }) => {
               </Grid>
               <Grid container>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField
+                  <Button
+                    variant="contained"
+                    color="secondary"
                     id="facilityTime"
-                    label="Facility Time"
                     fullWidth
+                    className={classes.facility}
                     onClick={() => setIsFacilityOpen(true)}
-                  />
+                  >
+                    Facility Time
+                  </Button>
                 </Grid>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField
-                    id="appointment"
+                  <ChipInput
+                    onChange={(chip) => {
+                      dispatch({
+                        type: "onInputChange",
+                        value: chip,
+                        id: "appointment",
+                      });
+                    }}
                     label="Appointment Pool"
                     fullWidth
                   />

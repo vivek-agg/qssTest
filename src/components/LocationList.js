@@ -105,6 +105,9 @@ const useStyles2 = makeStyles({
   table: {
     minWidth: 500,
   },
+  paper: {
+    marginTop: "50px",
+  },
   noLocationWrapper: {
     top: "50%",
     display: "flex",
@@ -143,20 +146,34 @@ const useStyles2 = makeStyles({
   },
 });
 
+const safelyParseJSON = (json) => {
+  // This function cannot be optimised, it's best to
+  // keep it small!
+  let parsed;
+
+  try {
+    parsed = JSON.parse(json);
+  } catch (e) {
+    // Oh well, but whatever...
+  }
+
+  return parsed; // Could be undefined!
+};
+
 export default function LocationList() {
   const classes = useStyles2();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [rows, setRows] = useState(
-    JSON.parse(localStorage.getItem("locations"))
+    safelyParseJSON(localStorage.getItem("locations") || [])
   );
 
-  rows.map((row) => {
+  (rows || []).map((row) => {
     return createData(row.locationName, row.addressLine1, row.phone);
   });
 
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+  // const emptyRows =
+  //   rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -168,20 +185,20 @@ export default function LocationList() {
   };
 
   const deleteLocation = (id) => {
-    // debugger;
     const storedLocations = JSON.parse(localStorage.getItem("locations"));
     storedLocations.splice(id, 1);
-    // if (storedLocations.length) {
     localStorage.setItem("locations", JSON.stringify(storedLocations));
-    // }
     setRows(storedLocations);
   };
 
   return (
     <>
-      {rows.length ? (
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="custom pagination table">
+      {rows && rows.length ? (
+        <TableContainer component={Paper} className={classes.paper}>
+          <Table
+            className={classes.table}
+            aria-label="custom pagination table location-table"
+          >
             <TableHead>
               <TableRow>
                 <TableCell>Location Name</TableCell>
@@ -199,7 +216,7 @@ export default function LocationList() {
                 : rows
               ).map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell component="th" scope="row">
+                  <TableCell component="tr" scope="row">
                     {row.locationName}
                   </TableCell>
                   <TableCell style={{ width: 160 }}>
