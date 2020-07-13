@@ -64,7 +64,7 @@ const initialState = {
   suite: "",
   addressLine2: "",
   city: "",
-  state: "",
+  stateName: "",
   zip: "",
   phone: "",
   timezone: "",
@@ -77,6 +77,22 @@ const reducer = (state, action) => {
   switch (action.type) {
     case "onLocationChange":
       return { ...state, locationName: action.value };
+    case "addressLine1Change":
+      return { ...state, addressLine1: action.value };
+    case "suiteChange":
+      return { ...state, suite: action.value };
+    case "addressLine2Change":
+      return { ...state, addressLine2: action.value };
+    case "cityChange":
+      return { ...state, city: action.value };
+    case "stateChange":
+      return { ...state, stateName: action.value };
+    case "zipChange":
+      return { ...state, zip: action.value };
+    case "phoneChange":
+      return { ...state, phone: action.value };
+    case "timezoneChange":
+      return { ...state, timezone: action.value };
 
     case "mergeTimings":
       return { ...state, timings: action.value };
@@ -96,7 +112,6 @@ const AddLocation = ({ history }) => {
     if (id) {
       const locationArray = JSON.parse(localStorage.getItem("locations"));
       const editState = locationArray.splice(id, 1);
-      console.log(editState[0]);
       dispatch({ type: "changeToEditState", value: editState[0] });
     }
   }, []);
@@ -106,7 +121,6 @@ const AddLocation = ({ history }) => {
   const [locationState, dispatch] = useReducer(reducer, initialState);
 
   const submitTimings = (timings) => {
-    console.log(timings);
     dispatch({ type: "mergeTimings", value: timings });
   };
 
@@ -119,12 +133,10 @@ const AddLocation = ({ history }) => {
     const locationArray = JSON.parse(localStorage.getItem("locations")) || [];
     if (!id) {
       locationArray.push(locationState);
-      localStorage.setItem("locations", JSON.stringify(locationArray));
     } else {
       locationArray[id] = locationState;
-      // locationArray.push(locationState);
-      localStorage.setItem("locations", JSON.stringify(locationArray));
     }
+    localStorage.setItem("locations", JSON.stringify(locationArray));
     history.push("/");
   };
 
@@ -157,10 +169,28 @@ const AddLocation = ({ history }) => {
                     id="addressLine1"
                     label="Address Line1"
                     fullWidth
+                    value={locationState.addressLine1}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "addressLine1Change",
+                        value: e.target.value,
+                      })
+                    }
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField id="suite" label="Suite No." fullWidth />
+                  <TextField
+                    id="suite"
+                    label="Suite No."
+                    fullWidth
+                    value={locationState.suite}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "suiteChange",
+                        value: e.target.value,
+                      })
+                    }
+                  />
                 </Grid>
               </Grid>
               <Grid container>
@@ -169,24 +199,86 @@ const AddLocation = ({ history }) => {
                     id="addressLine2"
                     label="Address Line2"
                     fullWidth
+                    value={locationState.addressLine2}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "addressLine2Change",
+                        value: e.target.value,
+                      })
+                    }
                   />
                 </Grid>
                 <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField id="city" label="City" fullWidth />
+                  <TextField
+                    id="city"
+                    label="City"
+                    fullWidth
+                    value={locationState.city}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "cityChange",
+                        value: e.target.value,
+                      })
+                    }
+                  />
                 </Grid>
                 <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField id="state" label="State" fullWidth />
+                  <TextField
+                    id="state"
+                    label="State"
+                    fullWidth
+                    value={locationState.stateName}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "stateChange",
+                        value: e.target.value,
+                      })
+                    }
+                  />
                 </Grid>
               </Grid>
               <Grid container>
                 <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField id="zip" label="Zip Code" fullWidth />
+                  <TextField
+                    id="zip"
+                    label="Zip Code"
+                    fullWidth
+                    value={locationState.zip}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "zipChange",
+                        value: e.target.value,
+                      })
+                    }
+                  />
                 </Grid>
                 <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField id="phone" label="Phone No." fullWidth />
+                  <TextField
+                    id="phone"
+                    label="Phone No."
+                    fullWidth
+                    value={locationState.phone}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "phoneChange",
+                        value: e.target.value,
+                      })
+                    }
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField id="timezone" label="Time Zone" fullWidth />
+                  <TextField
+                    id="timezone"
+                    label="Time Zone"
+                    fullWidth
+                    value={locationState.timezone}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "timezoneChange",
+                        value: e.target.value,
+                      })
+                    }
+                  />
                 </Grid>
               </Grid>
               <Grid container>

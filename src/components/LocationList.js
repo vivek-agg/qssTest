@@ -97,8 +97,8 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-function createData(locationName, address, phone) {
-  return { locationName, address, phone };
+function createData(locationName, addressLine1, phone) {
+  return { locationName, addressLine1, phone };
 }
 
 const useStyles2 = makeStyles({
@@ -152,7 +152,7 @@ export default function LocationList() {
   );
 
   rows.map((row) => {
-    return createData(row.locationName, row.address, row.phone);
+    return createData(row.locationName, row.addressLine1, row.phone);
   });
 
   const emptyRows =
@@ -185,9 +185,9 @@ export default function LocationList() {
             <TableHead>
               <TableRow>
                 <TableCell>Location Name</TableCell>
-                <TableCell align="right">Address</TableCell>
-                <TableCell align="right">Phone</TableCell>
-                <TableCell align="right">Edit</TableCell>
+                <TableCell>Address</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell align="right">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -202,12 +202,10 @@ export default function LocationList() {
                   <TableCell component="th" scope="row">
                     {row.locationName}
                   </TableCell>
-                  <TableCell style={{ width: 160 }} align="right">
-                    {row.address}
+                  <TableCell style={{ width: 160 }}>
+                    {row.addressLine1}
                   </TableCell>
-                  <TableCell style={{ width: 160 }} align="right">
-                    {row.phone}
-                  </TableCell>
+                  <TableCell style={{ width: 160 }}>{row.phone}</TableCell>
                   <TableCell style={{ width: 160 }} align="right">
                     <Link to={`/addLocation/${index}`} className={classes.link}>
                       <EditIcon />
