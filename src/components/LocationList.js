@@ -18,6 +18,7 @@ import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import LastPageIcon from "@material-ui/icons/LastPage";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import PinDropOutlinedIcon from "@material-ui/icons/PinDropOutlined";
 
 const useStyles1 = makeStyles((theme) => ({
   root: {
@@ -104,6 +105,42 @@ const useStyles2 = makeStyles({
   table: {
     minWidth: 500,
   },
+  noLocationWrapper: {
+    top: "50%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    position: "relative",
+    justifyContent: "center",
+    transform: "translateY(-75%)",
+  },
+  locationImage: {
+    width: "150px",
+    height: "150px",
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "50%",
+    backgroundColor: "#d8d8d8",
+  },
+  locationSvg: {
+    fontSize: "96px",
+    color: "#286090",
+  },
+  noLocationInfo: {
+    "& p": {
+      padding: "0",
+    },
+  },
+  noLocationInfoTitle: {
+    fontSize: "16px",
+    fontWeight: "700",
+  },
+  noLocationInfoSubTitle: {
+    fontSize: "14px",
+    fontWeight: "400",
+  },
 });
 
 export default function LocationList() {
@@ -131,68 +168,90 @@ export default function LocationList() {
   };
 
   const deleteLocation = (id) => {
+    // debugger;
     const storedLocations = JSON.parse(localStorage.getItem("locations"));
     storedLocations.splice(id, 1);
-    if (storedLocations.length) {
-      localStorage.setItem("locations", JSON.stringify(storedLocations));
-    }
+    // if (storedLocations.length) {
+    localStorage.setItem("locations", JSON.stringify(storedLocations));
+    // }
     setRows(storedLocations);
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="custom pagination table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Location Name</TableCell>
-            <TableCell align="right">Address</TableCell>
-            <TableCell align="right">Phone</TableCell>
-            <TableCell align="right">Edit</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {(rowsPerPage > 0
-            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : rows
-          ).map((row, index) => (
-            <TableRow key={index}>
-              <TableCell component="th" scope="row">
-                {row.locationName}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.address}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.phone}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                <Link to={`/addLocation/${index}`} className={classes.link}>
-                  <EditIcon />
-                </Link>
-                <DeleteIcon onClick={() => deleteLocation(index)} />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-              colSpan={5}
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              SelectProps={{
-                inputProps: { "aria-label": "rows per page" },
-                native: true,
-              }}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+    <>
+      {rows.length ? (
+        <TableContainer component={Paper}>
+          <Table className={classes.table} aria-label="custom pagination table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Location Name</TableCell>
+                <TableCell align="right">Address</TableCell>
+                <TableCell align="right">Phone</TableCell>
+                <TableCell align="right">Edit</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rowsPerPage > 0 && rows.length
+                ? rows.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : rows
+              ).map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell component="th" scope="row">
+                    {row.locationName}
+                  </TableCell>
+                  <TableCell style={{ width: 160 }} align="right">
+                    {row.address}
+                  </TableCell>
+                  <TableCell style={{ width: 160 }} align="right">
+                    {row.phone}
+                  </TableCell>
+                  <TableCell style={{ width: 160 }} align="right">
+                    <Link to={`/addLocation/${index}`} className={classes.link}>
+                      <EditIcon />
+                    </Link>
+                    <DeleteIcon onClick={() => deleteLocation(index)} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={5}
+                  count={rows.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  SelectProps={{
+                    inputProps: { "aria-label": "rows per page" },
+                    native: true,
+                  }}
+                  onChangePage={handleChangePage}
+                  onChangeRowsPerPage={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
+      ) : (
+        <div className={classes.noLocationWrapper}>
+          <div className={classes.locationImage}>
+            <PinDropOutlinedIcon className={classes.locationSvg} />
+          </div>
+          <div className={classes.noLocationInfo}>
+            <p className={classes.noLocationInfoTitle}>
+              Kindly Add Your Location First
+            </p>
+            <p className={classes.noLocationInfoSubTitle}>
+              There is no location added right now
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

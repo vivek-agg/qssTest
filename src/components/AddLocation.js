@@ -1,5 +1,5 @@
-import React, { useState, useReducer } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useState, useReducer, useEffect } from "react";
+import { Link, useParams, withRouter } from "react-router-dom";
 import { Grid, TextField, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
@@ -80,20 +80,26 @@ const reducer = (state, action) => {
 
     case "mergeTimings":
       return { ...state, timings: action.value };
+
+    case "changeToEditState":
+      return action.value;
     default:
       return state;
   }
 };
 
-const AddLocation = () => {
+const AddLocation = ({ history }) => {
   const classes = useStyles();
   const { id } = useParams();
-  let editState;
 
-  if (id) {
-    const locationArray = JSON.parse(localStorage.getItem("locations"));
-    editState = locationArray.splice(id, 1);
-  }
+  useEffect(() => {
+    if (id) {
+      const locationArray = JSON.parse(localStorage.getItem("locations"));
+      const editState = locationArray.splice(id, 1);
+      console.log(editState[0]);
+      dispatch({ type: "changeToEditState", value: editState[0] });
+    }
+  }, []);
 
   const [isFacilityOpen, setIsFacilityOpen] = useState(false);
 
@@ -111,8 +117,15 @@ const AddLocation = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const locationArray = JSON.parse(localStorage.getItem("locations")) || [];
-    locationArray.push(locationState);
-    localStorage.setItem("locations", JSON.stringify(locationArray));
+    if (!id) {
+      locationArray.push(locationState);
+      localStorage.setItem("locations", JSON.stringify(locationArray));
+    } else {
+      locationArray[id] = locationState;
+      // locationArray.push(locationState);
+      localStorage.setItem("locations", JSON.stringify(locationArray));
+    }
+    history.push("/");
   };
 
   return (
@@ -223,6 +236,7 @@ const AddLocation = () => {
         <LocationTiming
           submitTimings={submitTimings}
           closeTimings={closeTimings}
+          timings={locationState.timings}
         />
       ) : (
         ""
@@ -231,4 +245,4 @@ const AddLocation = () => {
   );
 };
 
-export default AddLocation;
+export default withRouter(AddLocation);

@@ -3,7 +3,6 @@ import { TextField, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Checkbox from "@material-ui/core/Checkbox";
-import Switch from "@material-ui/core/Switch";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { initialTimingState } from "../common/type";
 
@@ -29,10 +28,10 @@ const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    margin: "10px 0",
   },
   timeInput: {
     width: "60px",
-    top: "7px",
     "& input": {
       padding: "5px",
       height: "14px",
@@ -40,6 +39,72 @@ const useStyles = makeStyles({
   },
   checkbox: {
     width: "80px",
+  },
+  applyToAll: {
+    border: "2px solid #29608c",
+    padding: "5px 12px",
+    fontSize: "14px",
+    borderRadius: "6px",
+    color: "#29608c",
+    fontWeight: "500",
+  },
+  buttonWrapper: {
+    textAlign: "right",
+  },
+  primaryBtn: {
+    background: "#29608c",
+    marginTop: "16px",
+  },
+  cancelBtn: {
+    background: "#f86a5d",
+    marginRight: "16px",
+    marginTop: "16px",
+  },
+  fromWrapper: {
+    display: "flex",
+    alignItems: "center",
+  },
+  fromAmPm: {
+    display: "flex",
+    color: "#000",
+    fontSize: "13px",
+    marginLeft: "10px",
+    cursor: "pointer",
+  },
+  fromAm: {
+    background: "#e2e5e6",
+    padding: "3px 10px",
+    borderTopLeftRadius: "5px",
+    borderBottomLeftRadius: "5px",
+  },
+  fromPm: {
+    background: "#e2e5e6",
+    padding: "3px 10px",
+    borderTopRightRadius: "5px",
+    borderBottomRightRadius: "5px",
+  },
+  toAmPm: {
+    display: "flex",
+    color: "#000",
+    fontSize: "13px",
+    marginLeft: "10px",
+    cursor: "pointer",
+  },
+  toAm: {
+    background: "#e2e5e6",
+    padding: "3px 10px",
+    borderTopLeftRadius: "5px",
+    borderBottomLeftRadius: "5px",
+  },
+  toPm: {
+    background: "#e2e5e6",
+    padding: "3px 10px",
+    borderTopRightRadius: "5px",
+    borderBottomRightRadius: "5px",
+  },
+  isChecked: {
+    background: "#29608c",
+    color: "#fff",
   },
 });
 
@@ -71,20 +136,20 @@ const reducer = (state, action) => {
               ...s,
               from: fromCopy.from,
               to: fromCopy.to,
-              //   isToPm: fromCopy.isToPm,
-              //   isFromPm: fromCopy.isFromPm,
+              isToPm: fromCopy.isToPm,
+              isFromPm: fromCopy.isFromPm,
             }
           : {
               ...s,
             }
       );
-    case "toggleToPm":
+    case "toggleToAmPm":
       return state.map((s, index) => ({
         ...s,
         isToPm: action.index === index ? !s.isToPm : s.isToPm,
       }));
 
-    case "toggleFromPm":
+    case "toggleFromAmPm":
       return state.map((s, index) => ({
         ...s,
         isFromPm: action.index === index ? !s.isFromPm : s.isFromPm,
@@ -97,31 +162,52 @@ const reducer = (state, action) => {
 
 const LocationTiming = (props) => {
   const classes = useStyles();
+  const { timings } = props;
 
-  const [formState, dispatch] = useReducer(reducer, initialTimingState);
+  const [formState, dispatch] = useReducer(
+    reducer,
+    timings || initialTimingState
+  );
 
   const changeTimeFormat = (e, index, type) => {
     const taretValue = e.target.value;
-    let dispatchType;
+    let dispatchType, toPmDispatchType;
     const timeArray = taretValue.split(":");
     const newHours = timeArray[0] < 12 ? timeArray[0] : (timeArray[0] * 1) % 12;
     const newMins = timeArray[1] ? timeArray[1] : "00";
     if (type === "from") {
       dispatchType = "fromTimeChange";
+      toPmDispatchType = "toggleFromAmPm";
     } else {
       dispatchType = "toTimeChange";
+      toPmDispatchType = "toggleToAmPm";
     }
     dispatch({
       type: dispatchType,
       index,
-      value: (newHours < 10 ? "0" : "") + newHours + ":" + newMins,
+      value: (newHours < 10 ? "0" : "") + newHours * 1 + ":" + newMins,
     });
+    const isAlreadyPm =
+      type === "from" ? formState[index].isFromPm : formState[index].isToPm;
+
+    if (timeArray[0] > 12 && !isAlreadyPm) {
+      dispatch({ type: toPmDispatchType, index });
+    }
+  };
+
+  const toggleAmPm = (e, index, type) => {
+    if (e.target.className.indexOf("isChecked") > 0) {
+      return true;
+    }
+    let dispatchType = type === "from" ? "toggleFromAmPm" : "toggleToAmPm";
+    dispatch({ type: dispatchType, index });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(formState);
     props.submitTimings(formState);
+    props.closeTimings();
   };
 
   return (
@@ -153,7 +239,7 @@ const LocationTiming = (props) => {
                   labelPlacement="end"
                   className={classes.checkbox}
                 />
-                <div>
+                <div className={classes.fromWrapper}>
                   <TextField
                     variant="outlined"
                     className={classes.timeInput}
@@ -173,28 +259,26 @@ const LocationTiming = (props) => {
                       changeTimeFormat(e, index, "from");
                     }}
                   />
-                  {/* <FormControlLabel
-                    control={
-                      <Switch
-                        checked={row.isFromPm}
-                        onChange={() => {
-                          dispatch({ type: "toggleFromPm", index });
-                        }}
-                        name={`${row}FromSwitch`}
-                      />
-                    }
-                    label="Small"
-                  /> */}
-                  <Switch
-                    checked={row.isFromPm}
-                    onChange={() => {
-                      dispatch({ type: "toggleFromPm", index });
-                    }}
-                    name={`${row}FromSwitch`}
-                    inputProps={{ "aria-label": "secondary checkbox" }}
-                  />
+                  <div className={classes.fromAmPm}>
+                    <div
+                      onClick={(e) => toggleAmPm(e, index, "from")}
+                      className={`${classes.fromAm} ${
+                        !row.isFromPm ? classes.isChecked : ""
+                      }`}
+                    >
+                      AM
+                    </div>
+                    <div
+                      onClick={(e) => toggleAmPm(e, index, "from")}
+                      className={`${classes.fromPm} ${
+                        row.isFromPm ? classes.isChecked : ""
+                      }`}
+                    >
+                      PM
+                    </div>
+                  </div>
                 </div>
-                <div>
+                <div className={classes.fromWrapper}>
                   <TextField
                     variant="outlined"
                     className={classes.timeInput}
@@ -210,24 +294,59 @@ const LocationTiming = (props) => {
                       changeTimeFormat(e, index, "to");
                     }}
                   />
-                  <Switch
+                  <div className={classes.toAmPm}>
+                    <div
+                      onClick={(e) => toggleAmPm(e, index, "to")}
+                      className={`${classes.toAm} ${
+                        !row.isToPm ? classes.isChecked : ""
+                      }`}
+                    >
+                      AM
+                    </div>
+                    <div
+                      onClick={(e) => toggleAmPm(e, index, "to")}
+                      className={`${classes.toPm} ${
+                        row.isToPm ? classes.isChecked : ""
+                      }`}
+                    >
+                      PM
+                    </div>
+                  </div>
+                  {/* <Switch
                     checked={row.isToPm}
                     onChange={() => {
                       dispatch({ type: "toggleToPm", index });
                     }}
                     name={`${row}ToSwitch`}
                     inputProps={{ "aria-label": "secondary checkbox" }}
-                  />
+                  /> */}
                 </div>
                 <div
+                  className={classes.applyToAll}
                   onClick={() => dispatch({ type: "applyToAllChecked", index })}
                 >
                   Apply to All Checked
                 </div>
               </div>
             ))}
-            <Button onClick={props.closeTimings}>Cancel </Button>
-            <Button type="submit">Save </Button>
+            <div className={classes.buttonWrapper}>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={props.closeTimings}
+                className={classes.cancelBtn}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                type="submit"
+                className={classes.primaryBtn}
+              >
+                Save
+              </Button>
+            </div>
           </form>
         </div>
       </div>
