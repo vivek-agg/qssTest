@@ -219,11 +219,9 @@ export default function LocationList() {
                   <TableCell component="tr" scope="row">
                     {row.locationName}
                   </TableCell>
-                  <TableCell style={{ width: 160 }}>
-                    {row.addressLine1}
-                  </TableCell>
-                  <TableCell style={{ width: 160 }}>{row.phone}</TableCell>
-                  <TableCell style={{ width: 160 }} align="right">
+                  <TableCell>{row.addressLine1}</TableCell>
+                  <TableCell>{row.phone}</TableCell>
+                  <TableCell align="right">
                     <Link to={`/addLocation/${index}`} className={classes.link}>
                       <EditIcon />
                     </Link>

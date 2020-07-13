@@ -1,25 +1,12 @@
 import React, { useState, useReducer, useEffect } from "react";
 import { Link, useParams, withRouter } from "react-router-dom";
-import {
-  Grid,
-  TextField,
-  Button,
-  Select,
-  FormControl,
-  InputLabel,
-  MenuItem,
-} from "@material-ui/core";
-import ChipInput from "material-ui-chip-input";
+import { Grid, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import LocationTiming from "./LocationTiming";
 import { initialTimingState, formatPhoneNumber } from "../common/type";
-
-const states = [
-  { id: "1", name: "New York" },
-  { id: "2", name: "Chichago" },
-  { id: "3", name: "California" },
-];
+import FormWrapper from "../common/FormWrapper";
+import { FormFields } from "../common/FormField";
 
 const useStyles = makeStyles({
   locationContainer: {
@@ -70,16 +57,6 @@ const useStyles = makeStyles({
   },
   link: {
     textDecoration: "none",
-  },
-  facility: {
-    color: "#000",
-    backgroundColor: "#ebe8e9",
-    marginTop: "17px",
-
-    "&:hover": {
-      color: "#000",
-      backgroundColor: "#ebe8e9",
-    },
   },
 });
 
@@ -172,7 +149,6 @@ const AddLocation = ({ history }) => {
       setPhoneValid(true);
     }
     setErrors(errors);
-    console.log("errors", errors);
     if (Object.keys(errors).length === 0) {
       locationState.phone = formatPhoneNumber(locationState.phone);
       if (!id) {
@@ -195,209 +171,16 @@ const AddLocation = ({ history }) => {
           </Typography>
           <form className={classes.form} onSubmit={handleSubmit} noValidate>
             <Grid container>
-              <Grid item xs={12} sm={12} className={classes.locationField}>
-                <TextField
-                  id="locationName"
-                  label="Location Name"
-                  fullWidth
-                  value={locationState.locationName}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "onInputChange",
-                      value: e.target.value,
-                      id: "locationName",
-                    })
-                  }
-                  required="true"
-                  error={
-                    submitted && !(locationState && locationState.locationName)
-                  }
-                  helperText={errors && errors.locationName}
-                  floatingLabelText="Location Name"
-                  errorText="Required"
-                />
-              </Grid>
-              <Grid container>
-                <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField
-                    required="true"
-                    id="addressLine1"
-                    label="Address Line1"
-                    fullWidth
-                    value={locationState.addressLine1}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "onInputChange",
-                        value: e.target.value,
-                        id: "addressLine1",
-                      })
-                    }
-                    error={
-                      submitted &&
-                      !(locationState && locationState.addressLine1)
-                    }
-                    helperText={errors && errors.addressLine1}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField
-                    id="suite"
-                    label="Suite No."
-                    fullWidth
-                    value={locationState.suite}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "onInputChange",
-                        value: e.target.value,
-                        id: "suite",
-                      })
-                    }
-                  />
-                </Grid>
-              </Grid>
-              <Grid container>
-                <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField
-                    id="addressLine2"
-                    label="Address Line2"
-                    fullWidth
-                    value={locationState.addressLine2}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "onInputChange",
-                        value: e.target.value,
-                        id: "addressLine2",
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField
-                    id="city"
-                    label="City"
-                    fullWidth
-                    value={locationState.city}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "onInputChange",
-                        value: e.target.value,
-                        id: "city",
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <FormControl fullWidth>
-                    <InputLabel htmlFor="state">State</InputLabel>
-                    <Select
-                      labelId="state"
-                      id="state"
-                      value={locationState.stateName}
-                      onChange={(e) => {
-                        dispatch({
-                          type: "onInputChange",
-                          value: e.target.value,
-                          id: "stateName",
-                        });
-                      }}
-                    >
-                      {states.map((state) => (
-                        <MenuItem key={state.id} value={state.name}>
-                          {state.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-              <Grid container>
-                <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField
-                    required="true"
-                    error={
-                      submitted &&
-                      !(locationState && locationState.zip && zipValid)
-                    }
-                    id="zip"
-                    label="Zip Code"
-                    fullWidth
-                    value={locationState.zip}
-                    helperText={errors && errors.zip}
-                    onChange={(e) => {
-                      const newVal = e.target.value.replace(/\s/g, "");
-                      dispatch({
-                        type: "onInputChange",
-                        value: newVal,
-                        id: "zip",
-                      });
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3} className={classes.locationField}>
-                  <TextField
-                    required="true"
-                    error={
-                      submitted &&
-                      !(locationState && locationState.phone && phoneValid)
-                    }
-                    id="phone"
-                    label="Phone No."
-                    type="text"
-                    fullWidth
-                    value={locationState.phone}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "onInputChange",
-                        value: e.target.value,
-                        id: "phone",
-                      })
-                    }
-                    helperText={errors && errors.phone}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <TextField
-                    id="timezone"
-                    label="Time Zone"
-                    fullWidth
-                    value={locationState.timezone}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "onInputChange",
-                        value: e.target.value,
-                        id: "timezone",
-                      })
-                    }
-                  />
-                </Grid>
-              </Grid>
-              <Grid container>
-                <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    id="facilityTime"
-                    fullWidth
-                    className={classes.facility}
-                    onClick={() => setIsFacilityOpen(true)}
-                  >
-                    Facility Time
-                  </Button>
-                </Grid>
-                <Grid item xs={12} sm={6} className={classes.locationField}>
-                  <ChipInput
-                    onChange={(chip) => {
-                      dispatch({
-                        type: "onInputChange",
-                        value: chip,
-                        id: "appointment",
-                      });
-                    }}
-                    label="Appointment Pool"
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
+              <FormWrapper
+                fields={FormFields}
+                errors={errors}
+                state={locationState}
+                dispatch={dispatch}
+                submitted={submitted}
+                setIsFacilityOpen={setIsFacilityOpen}
+                phoneValid={phoneValid}
+                zipValid={zipValid}
+              />
               <Grid container>
                 <Grid item xs={12} sm={6} className={classes.locationField}>
                   <Link to="/" className={classes.link}>

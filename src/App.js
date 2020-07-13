@@ -9,8 +9,8 @@ function App() {
   return (
     <BrowserRouter>
       <Navbar />
-      <Route component={AddLocation} path="/addLocation/:id" />
-      <Route component={AddLocation} path="/addLocation" />
+      <Route exact component={AddLocation} path="/addLocation/:id" />
+      <Route exact component={AddLocation} path="/addLocation" />
       <Route exact component={LocationList} path="/" />
     </BrowserRouter>
   );
