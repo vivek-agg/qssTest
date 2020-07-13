@@ -205,7 +205,6 @@ const LocationTiming = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formState);
     props.submitTimings(formState);
     props.closeTimings();
   };
@@ -312,14 +311,6 @@ const LocationTiming = (props) => {
                       PM
                     </div>
                   </div>
-                  {/* <Switch
-                    checked={row.isToPm}
-                    onChange={() => {
-                      dispatch({ type: "toggleToPm", index });
-                    }}
-                    name={`${row}ToSwitch`}
-                    inputProps={{ "aria-label": "secondary checkbox" }}
-                  /> */}
                 </div>
                 <div
                   className={classes.applyToAll}

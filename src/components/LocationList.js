@@ -144,6 +144,9 @@ const useStyles2 = makeStyles({
     fontSize: "14px",
     fontWeight: "400",
   },
+  link: {
+    cursor: "pointer",
+  },
 });
 
 const safelyParseJSON = (json) => {
@@ -225,7 +228,10 @@ export default function LocationList() {
                     <Link to={`/addLocation/${index}`} className={classes.link}>
                       <EditIcon />
                     </Link>
-                    <DeleteIcon onClick={() => deleteLocation(index)} />
+                    <DeleteIcon
+                      onClick={() => deleteLocation(index)}
+                      className={classes.link}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
